@@ -10,62 +10,59 @@ import {
   NumberProperty,
   TextProperty,
 } from "../properties/index.js";
+import { buildEntityMetadata } from "../metadata/build.js";
 
 import type { EntitySchema } from "../types/entity.js";
 
-import type { SnakeToCamel } from "../types/naming.js";
-
-import { snakeToCamel } from "../utils/naming.js";
+import { normalizeEntityName, normalizeTableName } from "../utils/naming.js";
 
 import type { EntityDefinition } from "./entity.js";
 
-import type { EntityNameOrConfig } from "./config.js";
+import {
+  HasMany,
+  HasOne,
+  HasOneWithForeignKey,
+  BelongsTo,
+  ManyToMany,
+  type RelationshipOptions,
+} from "../relations/index.js";
 
 export class EntityBuilder {
-  define<
-    const TNameOrConfig extends EntityNameOrConfig,
-    const TSchema extends EntitySchema,
-  >(
-    nameOrConfig: TNameOrConfig,
+  define<const TName extends string, const TSchema extends EntitySchema>(
+    nameOrConfig:
+      | TName
+      | {
+          name?: string;
+          tableName?: string;
+        },
     schema: TSchema,
-  ): EntityDefinition<
-    TNameOrConfig extends string
-      ? SnakeToCamel<TNameOrConfig>
-      : TNameOrConfig extends {
-            name: infer TName extends string;
-          }
-        ? TName
-        : string,
-    TSchema
-  > {
-    const config =
+  ): EntityDefinition<ReturnType<typeof normalizeEntityName> & TName, TSchema> {
+    const rawName =
       typeof nameOrConfig === "string"
-        ? {
-            name: snakeToCamel(nameOrConfig),
-            tableName: nameOrConfig,
-          }
-        : {
-            name: nameOrConfig.name ?? snakeToCamel(nameOrConfig.tableName),
-            tableName: nameOrConfig.tableName,
-          };
+        ? nameOrConfig
+        : (nameOrConfig.name ?? nameOrConfig.tableName);
+
+    if (!rawName) {
+      throw new Error("Entity name is required.");
+    }
+
+    const name = normalizeEntityName(rawName);
+
+    const tableName =
+      typeof nameOrConfig === "object" && nameOrConfig.tableName
+        ? normalizeTableName(nameOrConfig.tableName)
+        : normalizeTableName(rawName);
+
+    const metadata = buildEntityMetadata(name, tableName, schema);
 
     return {
-      name: config.name,
-      tableName: config.tableName,
+      name,
+      tableName,
       fields: schema,
-      __entity: true as const,
-    } as EntityDefinition<
-      TNameOrConfig extends string
-        ? SnakeToCamel<TNameOrConfig>
-        : TNameOrConfig extends {
-              name: infer TName extends string;
-            }
-          ? TName
-          : string,
-      TSchema
-    >;
+      metadata,
+      __entity: true,
+    } as EntityDefinition<TName, TSchema>;
   }
-
   id(options?: { prefix?: string }): IdProperty {
     return new IdProperty(options);
   }
@@ -106,6 +103,52 @@ export class EntityBuilder {
     values: TValues,
   ): EnumProperty<TValues> {
     return new EnumProperty(values);
+  }
+
+  hasOne<TTarget, const TForeignKeyName extends string | undefined = undefined>(
+    entityBuilder: () => TTarget,
+    options: RelationshipOptions & {
+      foreignKey: true;
+      foreignKeyName?: TForeignKeyName;
+    },
+  ): HasOneWithForeignKey<TTarget, TForeignKeyName>;
+
+  hasOne<TTarget>(
+    entityBuilder: () => TTarget,
+    options?: RelationshipOptions & {
+      foreignKey?: false;
+    },
+  ): HasOne<TTarget>;
+
+  hasOne<TTarget>(
+    entityBuilder: () => TTarget,
+    options: RelationshipOptions = {},
+  ): HasOne<TTarget> {
+    return new HasOne(entityBuilder, options);
+  }
+
+  belongsTo<
+    TTarget,
+    const TForeignKeyName extends string | undefined = undefined,
+  >(
+    entityBuilder: () => TTarget,
+    options: RelationshipOptions = {},
+  ): BelongsTo<TTarget, TForeignKeyName> {
+    return new BelongsTo(entityBuilder, options);
+  }
+
+  hasMany<TTarget>(
+    entityBuilder: () => TTarget,
+    options: RelationshipOptions = {},
+  ): HasMany<TTarget> {
+    return new HasMany(entityBuilder, options);
+  }
+
+  manyToMany<TTarget>(
+    entityBuilder: () => TTarget,
+    options: import("../relations/many-to-many.js").ManyToManyOptions = {},
+  ): ManyToMany<TTarget> {
+    return new ManyToMany(entityBuilder, options);
   }
 }
 

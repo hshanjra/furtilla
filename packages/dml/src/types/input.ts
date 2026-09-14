@@ -1,6 +1,6 @@
 import type { EntitySchema } from "./entity.js";
 
-import type { IsNullable, PropertyValue } from "./entity.js";
+import type { IsNullable, PropertyValue } from "./infer.js";
 
 type IsGenerated<TProperty> = TProperty extends {
   options: infer TOptions;

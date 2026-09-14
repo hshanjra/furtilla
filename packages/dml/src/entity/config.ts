@@ -1,6 +1,11 @@
-export interface EntityConfig {
-  name?: string;
-  tableName: string;
-}
+export type DefineOptions =
+  | string
+  | {
+      name?: string;
+      tableName?: string;
+    };
 
-export type EntityNameOrConfig = string | EntityConfig;
+export interface EntityConfig {
+  readonly name: string;
+  readonly tableName: string;
+}
