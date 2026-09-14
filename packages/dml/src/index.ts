@@ -1,14 +1,31 @@
-import * as fields from "./fields/index.js";
-import { define } from "./model/define.js";
+export { EntityBuilder, model } from "./entity/index.js";
 
-export const model = {
-  define,
+export type { EntityDefinition, EntitySchema } from "./entity/index.js";
 
-  id: fields.id,
-  string: fields.string,
-  number: fields.number,
-  boolean: fields.boolean,
-  date: fields.date,
-};
+export {
+  Property,
+  IdProperty,
+  TextProperty,
+  NumberProperty,
+  FloatProperty,
+  BigNumberProperty,
+  BooleanProperty,
+  DateTimeProperty,
+  JSONProperty,
+  ArrayProperty,
+  EnumProperty,
+} from "./properties/index.js";
 
-export type { ModelDefinition } from "./model/model.js";
+export type {
+  PropertyKind,
+  PropertyOptions,
+  IdOptions,
+} from "./properties/index.js";
+
+export type { InferEntity } from "./types/entity.js";
+
+export type { InferCreateInput, InferUpdateInput } from "./types/input.js";
+
+export type { PropertyType } from "./types/property.js";
+
+export type { SystemFields } from "./types/system.js";
