@@ -1,3 +1,12 @@
+import type { PropertyConfig } from "../types/property-config.js";
+
+export interface PropertyOptions {
+  nullable?: boolean;
+  unique?: boolean;
+  primaryKey?: boolean;
+  default?: unknown;
+}
+
 export type PropertyKind =
   | "id"
   | "text"
@@ -10,17 +19,10 @@ export type PropertyKind =
   | "array"
   | "enum";
 
-export interface PropertyOptions {
-  nullable?: boolean;
-  unique?: boolean;
-  primaryKey?: boolean;
-  default?: unknown;
-}
-
 export abstract class Property<
-  TType,
+  TValue,
   TKind extends PropertyKind,
-  TSelf extends Property<TType, TKind, TSelf>,
+  TSelf extends Property<TValue, TKind, TSelf>,
 > {
   readonly kind: TKind;
   readonly options: PropertyOptions;
@@ -51,7 +53,7 @@ export abstract class Property<
     });
   }
 
-  default(value: TType): TSelf {
+  default(value: TValue): TSelf {
     return this.clone({
       ...this.options,
       default: value,
@@ -60,5 +62,7 @@ export abstract class Property<
 
   protected abstract clone(options: PropertyOptions): TSelf;
 
-  declare readonly __type: TType;
+  declare readonly __type: TValue;
+
+  declare readonly __config: PropertyConfig;
 }
