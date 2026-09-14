@@ -1,7 +1,9 @@
 import { Property, type PropertyOptions } from "./property.js";
 
+export type BigNumberValue = string;
+
 export class BigNumberProperty extends Property<
-  number,
+  BigNumberValue,
   "big_number",
   BigNumberProperty
 > {

@@ -1,25 +1,29 @@
 import { model } from "./index.js";
 
-export const User = model.define("user", {
-  id: model.id({ prefix: "usr" }).primaryKey(),
+import type {
+  InferEntity,
+  InferCreateInput,
+  InferUpdateInput,
+} from "./index.js";
+
+const User = model.define("user_data", {
+  id: model.id({
+    prefix: "usr",
+  }),
 
   email: model.text().unique(),
 
   name: model.text().nullable(),
 
-  age: model.number().default(0),
-
-  score: model.float(),
-
-  balance: model.bigNumber(),
+  age: model.number().nullable(),
 
   active: model.boolean().default(true),
 
-  birthDate: model.dateTime().nullable(),
-
-  metadata: model.json(),
-
-  tags: model.array(),
-
-  status: model.enum(["active", "inactive", "suspended"]),
+  status: model.enum(["active", "inactive"]),
 });
+
+type UserEntity = InferEntity<typeof User.fields>;
+
+type UserCreate = InferCreateInput<typeof User.fields>;
+
+type UserUpdate = InferUpdateInput<typeof User.fields>;

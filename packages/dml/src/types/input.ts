@@ -1,39 +1,49 @@
-import type { Property } from "../properties/property.js";
+import type { EntitySchema } from "./entity.js";
 
-import type {
-  PropertyType,
-  IsNullable,
-  HasDefault,
-  IsPrimaryKey,
-} from "./property.js";
+import type { IsNullable, PropertyValue } from "./entity.js";
 
-export type EntitySchema = Record<string, Property<any, any, any>>;
+type IsGenerated<TProperty> = TProperty extends {
+  options: infer TOptions;
+}
+  ? TOptions extends {
+      generated: true;
+    }
+    ? true
+    : false
+  : false;
+
+type IsDefaulted<TProperty> = TProperty extends {
+  options: infer TOptions;
+}
+  ? TOptions extends {
+      default: infer _;
+    }
+    ? true
+    : false
+  : false;
 
 type CreateValue<TProperty> =
   IsNullable<TProperty> extends true
-    ? PropertyType<TProperty> | null
-    : PropertyType<TProperty>;
-
-type IsOptionalCreateField<TProperty> =
-  HasDefault<TProperty> extends true
-    ? true
-    : IsPrimaryKey<TProperty> extends true
-      ? true
-      : false;
+    ? PropertyValue<TProperty> | null
+    : PropertyValue<TProperty>;
 
 type RequiredCreateFields<TSchema extends EntitySchema> = {
   [
-    K in keyof TSchema as IsOptionalCreateField<TSchema[K]> extends true
+    K in keyof TSchema as IsGenerated<TSchema[K]> extends true
       ? never
-      : K
+      : IsDefaulted<TSchema[K]> extends true
+        ? never
+        : K
   ]: CreateValue<TSchema[K]>;
 };
 
 type OptionalCreateFields<TSchema extends EntitySchema> = {
   [
-    K in keyof TSchema as IsOptionalCreateField<TSchema[K]> extends true
+    K in keyof TSchema as IsGenerated<TSchema[K]> extends true
       ? K
-      : never
+      : IsDefaulted<TSchema[K]> extends true
+        ? K
+        : never
   ]?: CreateValue<TSchema[K]>;
 };
 

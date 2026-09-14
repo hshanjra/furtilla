@@ -1,7 +1,17 @@
 import { Property, type PropertyOptions } from "./property.js";
 
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | {
+      [key: string]: JsonValue;
+    };
+
 export class JSONProperty extends Property<
-  Record<string, unknown>,
+  Record<string, JsonValue>,
   "json",
   JSONProperty
 > {

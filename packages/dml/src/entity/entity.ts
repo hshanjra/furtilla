@@ -1,19 +1,14 @@
-import type { InferEntity, EntitySchema } from "../types/entity.js";
-
-import type { InferCreateInput, InferUpdateInput } from "../types/input.js";
+import type { EntitySchema } from "../types/entity.js";
 
 export interface EntityDefinition<
   TName extends string,
   TSchema extends EntitySchema,
 > {
   readonly name: TName;
+
+  readonly tableName: string;
+
   readonly fields: TSchema;
 
-  readonly __entity?: true;
-
-  readonly __types?: {
-    entity: InferEntity<TSchema>;
-    create: InferCreateInput<TSchema>;
-    update: InferUpdateInput<TSchema>;
-  };
+  readonly __entity: true;
 }

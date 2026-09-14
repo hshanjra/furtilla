@@ -1,10 +1,9 @@
-import type { PropertyConfig } from "../types/property-config.js";
-
 export interface PropertyOptions {
   nullable?: boolean;
   unique?: boolean;
   primaryKey?: boolean;
   default?: unknown;
+  generated?: boolean;
 }
 
 export type PropertyKind =
@@ -63,6 +62,4 @@ export abstract class Property<
   protected abstract clone(options: PropertyOptions): TSelf;
 
   declare readonly __type: TValue;
-
-  declare readonly __config: PropertyConfig;
 }

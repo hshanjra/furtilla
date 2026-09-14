@@ -8,20 +8,19 @@ export class IdProperty extends Property<string, "id", IdProperty> {
   readonly prefix: string | undefined;
 
   constructor(options: IdOptions = {}) {
-    super("id", options);
+    super("id", {
+      ...options,
+      primaryKey: options.primaryKey ?? true,
+      generated: options.generated ?? true,
+    });
 
     this.prefix = options.prefix;
   }
 
   protected clone(options: PropertyOptions): IdProperty {
-    const nextOptions: IdOptions = {
+    return new IdProperty({
       ...options,
-    };
-
-    if (this.prefix !== undefined) {
-      nextOptions.prefix = this.prefix;
-    }
-
-    return new IdProperty(nextOptions);
+      ...(this.prefix !== undefined ? { prefix: this.prefix } : {}),
+    });
   }
 }
